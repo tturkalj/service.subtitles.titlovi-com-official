@@ -97,7 +97,7 @@ lat_to_cyr = {
 
 
 def logger(message):
-    xbmc.log("{0} - {1}".format(__name__, message))
+    xbmc.log("{0} - {1}".format(script_name, message))
 
 
 def show_notification(message):
@@ -491,6 +491,9 @@ class ActionHandler(object):
                 label=result_item['Lang'],
                 label2=title
             )
+            
+            logger('Lang: {0}'.format(result_item['Lang']))
+            
             listitem.setArt( { "icon": str(int(result_item['Rating'])), "thumb" :language_icon_mapping[result_item['Lang']] } )
             url = "plugin://{0}/?action=download&media_id={1}&type={2}" \
                 .format(script_id, result_item['Id'], result_item['Type'])
