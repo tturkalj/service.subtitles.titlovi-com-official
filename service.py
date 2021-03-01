@@ -28,10 +28,10 @@ script_name = addon.getAddonInfo('name')
 version = addon.getAddonInfo('version')
 get_string = addon.getLocalizedString
 
-script_dir = xbmc.translatePath(addon.getAddonInfo('path')).decode("utf-8")
-profile = xbmc.translatePath(addon.getAddonInfo('profile')).decode("utf-8")
-libs_dir = xbmc.translatePath(os.path.join(script_dir, 'resources', 'lib')).decode("utf-8")
-temp_dir = xbmc.translatePath(os.path.join(profile, 'temp', '')).decode("utf-8")
+script_dir = xbmc.translatePath(addon.getAddonInfo('path'))
+profile = xbmc.translatePath(addon.getAddonInfo('profile'))
+libs_dir = xbmc.translatePath(os.path.join(script_dir, 'resources', 'lib'))
+temp_dir = xbmc.translatePath(os.path.join(profile, 'temp', ''))
 
 player = xbmc.Player()
 
@@ -97,7 +97,7 @@ lat_to_cyr = {
 
 
 def logger(message):
-    xbmc.log("{0} - {1}".format(__name__, message).encode('utf-8'))
+    xbmc.log("{0} - {1}".format(__name__, message))
 
 
 def show_notification(message):
@@ -105,7 +105,7 @@ def show_notification(message):
 
 
 def normalize_string(_string):
-    return unicodedata.normalize('NFKD', str(_string, 'utf-8')).encode('ascii', 'ignore')
+    return unicodedata.normalize('NFKD', _string).encode('ascii', 'ignore')
 
 
 def parse_season_episode(_string):
@@ -489,10 +489,9 @@ class ActionHandler(object):
 
             listitem = xbmcgui.ListItem(
                 label=result_item['Lang'],
-                label2=title,
-                iconImage=str(int(result_item['Rating'])),
-                thumbnailImage=language_icon_mapping[result_item['Lang']]
+                label2=title
             )
+            listitem.setArt( { "icon": str(int(result_item['Rating'])), "thumb" :language_icon_mapping[result_item['Lang']] } )
             url = "plugin://{0}/?action=download&media_id={1}&type={2}" \
                 .format(script_id, result_item['Id'], result_item['Type'])
 
