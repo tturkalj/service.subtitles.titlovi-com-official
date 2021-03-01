@@ -549,7 +549,7 @@ class ActionHandler(object):
                 show_notification(get_string(32010))
                 return
 
-            zip_file = ZipFile(io.StringIO(response.content))
+            zip_file = ZipFile(io.BytesIO(response.content))
             zip_contents = zip_file.namelist()
             if not zip_contents:
                 show_notification(get_string(32010))
