@@ -12,11 +12,11 @@ import requests
 import simplecache
 import time
 import unicodedata
-import StringIO
+import io
 import codecs
 from datetime import datetime, timedelta
-from urlparse import parse_qs
-from urllib import quote_plus
+from urllib.parse import parse_qs
+from urllib.parse import quote_plus
 from zipfile import ZipFile
 
 addon = xbmcaddon.Addon()
@@ -28,10 +28,10 @@ script_name = addon.getAddonInfo('name')
 version = addon.getAddonInfo('version')
 get_string = addon.getLocalizedString
 
-script_dir = xbmc.translatePath(addon.getAddonInfo('path')).decode("utf-8")
-profile = xbmc.translatePath(addon.getAddonInfo('profile')).decode("utf-8")
-libs_dir = xbmc.translatePath(os.path.join(script_dir, 'resources', 'lib')).decode("utf-8")
-temp_dir = xbmc.translatePath(os.path.join(profile, 'temp', '')).decode("utf-8")
+script_dir = xbmc.translatePath(addon.getAddonInfo('path'))
+profile = xbmc.translatePath(addon.getAddonInfo('profile'))
+libs_dir = xbmc.translatePath(os.path.join(script_dir, 'resources', 'lib'))
+temp_dir = xbmc.translatePath(os.path.join(profile, 'temp', ''))
 
 player = xbmc.Player()
 
@@ -78,26 +78,26 @@ language_icon_mapping = {
 # taken from https://github.com/mikimac/script.module.lat2cyr/blob/master/lib/lat2cyr.py
 lat_to_cyr = {
         # Big letters
-        u'A': u'А', u'S': u'С', u'D': u'Д', u'F': u'Ф', u'G': u'Г',
-        u'H': u'Х', u'J': u'Ј', u'K': u'К', u'L': u'Л', u'Č': u'Ч',
-        u'Ć': u'Ћ', u'Ž': u'Ж', u'Lj': u'Љ', u'Nj': u'Њ', u'E': u'Е',
-        u'R': u'Р', u'T': u'Т', u'Z': u'З', u'U': u'У', u'I': u'И',
-        u'O': u'О', u'P': u'П', u'Š': u'Ш', u'Đ': u'Ђ', u'Dž': u'Џ',
-        u'C': u'Ц', u'V': u'В', u'B': u'Б', u'N': u'Н', u'M': u'М',
-        u'Dz': u'Ѕ',
+        'A': 'А', 'S': 'С', 'D': 'Д', 'F': 'Ф', 'G': 'Г',
+        'H': 'Х', 'J': 'Ј', 'K': 'К', 'L': 'Л', 'Č': 'Ч',
+        'Ć': 'Ћ', 'Ž': 'Ж', 'Lj': 'Љ', 'Nj': 'Њ', 'E': 'Е',
+        'R': 'Р', 'T': 'Т', 'Z': 'З', 'U': 'У', 'I': 'И',
+        'O': 'О', 'P': 'П', 'Š': 'Ш', 'Đ': 'Ђ', 'Dž': 'Џ',
+        'C': 'Ц', 'V': 'В', 'B': 'Б', 'N': 'Н', 'M': 'М',
+        'Dz': 'Ѕ',
         # small letters
-        u'a': u'а', u's': u'с', u'd': u'д', u'f': u'ф', u'g': u'г',
-        u'h': u'х', u'j': u'ј', u'k': u'к', u'l': u'л', u'č': u'ч',
-        u'ć': u'ћ', u'ž': u'ж', u'lj': u'љ', u'nj': u'њ', u'e': u'е',
-        u'r': u'р', u't': u'т', u'z': u'з', u'u': u'у', u'i': u'и',
-        u'o': u'о', u'p': u'п', u'š': u'ш', u'đ': u'ђ', u'dž': u'џ',
-        u'c': u'ц', u'v': u'в', u'b': u'б', u'n': u'н', u'm': u'м',
-        u'dz': u'ѕ'
+        'a': 'а', 's': 'с', 'd': 'д', 'f': 'ф', 'g': 'г',
+        'h': 'х', 'j': 'ј', 'k': 'к', 'l': 'л', 'č': 'ч',
+        'ć': 'ћ', 'ž': 'ж', 'lj': 'љ', 'nj': 'њ', 'e': 'е',
+        'r': 'р', 't': 'т', 'z': 'з', 'u': 'у', 'i': 'и',
+        'o': 'о', 'p': 'п', 'š': 'ш', 'đ': 'ђ', 'dž': 'џ',
+        'c': 'ц', 'v': 'в', 'b': 'б', 'n': 'н', 'm': 'м',
+        'dz': 'ѕ'
 }
 
 
 def logger(message):
-    xbmc.log(u"{0} - {1}".format(__name__, message).encode('utf-8'))
+    xbmc.log("{0} - {1}".format(script_name, message))
 
 
 def show_notification(message):
@@ -105,7 +105,7 @@ def show_notification(message):
 
 
 def normalize_string(_string):
-    return unicodedata.normalize('NFKD', unicode(_string, 'utf-8')).encode('ascii', 'ignore')
+    return unicodedata.normalize('NFKD', _string).encode('ascii', 'ignore')
 
 
 def parse_season_episode(_string):
@@ -145,12 +145,12 @@ def handle_lat_cyr_conversion(subtitle_file_path, convert_option):
     file_path_part, file_extension = os.path.splitext(subtitle_file_path)
 
     additional_extension = '.cyr' if convert_option == CONVERT_LAT_TO_CYR else '.lat'
-    converted_subtitle_file_path = u'{0}{1}{2}{3}'\
+    converted_subtitle_file_path = '{0}{1}{2}{3}'\
         .format(file_path_part, '.converted', additional_extension, file_extension)
     if os.path.isfile(converted_subtitle_file_path):
         return converted_subtitle_file_path
 
-    logger(u'1'.replace(u'Ж', u'Ž'))
+    logger('1'.replace('Ж', 'Ž'))
 
     text = None
     for encoding in encoding_list:
@@ -181,7 +181,7 @@ def handle_lat_cyr_conversion(subtitle_file_path, convert_option):
 
 
 def replace_lat_cyr_letters(text, convert_option, encoding):
-    if not isinstance(text, unicode):
+    if not isinstance(text, str):
         logger('decoding {0} text'.format(encoding))
         _text = text.decode(encoding)
     else:
@@ -189,15 +189,15 @@ def replace_lat_cyr_letters(text, convert_option, encoding):
 
     if convert_option == CONVERT_LAT_TO_CYR:
         logger('replacing letters lat to cyr')
-        for lat_letter, cyr_letter in lat_to_cyr.items():
+        for lat_letter, cyr_letter in list(lat_to_cyr.items()):
             _text = _text.replace(lat_letter, cyr_letter)
         #fix tag conversion, too lazy to do it with regex
-        for lat_letter, cyr_letter in lat_to_cyr.items():
-            _text = _text.replace(u'<{0}>'.format(cyr_letter), u'<{0}>'.format(lat_letter))
-            _text = _text.replace(u'</{0}>'.format(cyr_letter), u'</{0}>'.format(lat_letter))
+        for lat_letter, cyr_letter in list(lat_to_cyr.items()):
+            _text = _text.replace('<{0}>'.format(cyr_letter), '<{0}>'.format(lat_letter))
+            _text = _text.replace('</{0}>'.format(cyr_letter), '</{0}>'.format(lat_letter))
     else:
         logger('replacing letters cyr to lat')
-        for lat_letter, cyr_letter in lat_to_cyr.items():
+        for lat_letter, cyr_letter in list(lat_to_cyr.items()):
             _text = _text.replace(cyr_letter, lat_letter)
     return _text
 
@@ -335,7 +335,7 @@ class ActionHandler(object):
         elif self.action == 'download':
             self.handle_download_action()
         else:
-            logger(u'Invalid action')
+            logger('Invalid action')
             show_notification(get_string(2103))
 
     def handle_search_action(self):
@@ -417,7 +417,7 @@ class ActionHandler(object):
 
         sorted_search_params = sorted(search_params.items())
         hashable_search_params = tuple(temp for tuple_param in sorted_search_params for temp in tuple_param)
-        params_hash = unicode(repr(hashable_search_params))
+        params_hash = str(repr(hashable_search_params))
         result_list = addon_cache.get(params_hash)
         if result_list:
             logger('results loaded from cache')
@@ -482,17 +482,19 @@ class ActionHandler(object):
                 episode = -1
 
             if season > 0 and episode > 0:
-                title = u'{0} S{1}E{2}'.format(title, season, episode)
+                title = '{0} S{1}E{2}'.format(title, season, episode)
 
             if result_item['Release']:
-                title = u'{0} {1}'.format(title, result_item['Release'])
+                title = '{0} {1}'.format(title, result_item['Release'])
 
             listitem = xbmcgui.ListItem(
                 label=result_item['Lang'],
-                label2=title,
-                iconImage=str(int(result_item['Rating'])),
-                thumbnailImage=language_icon_mapping[result_item['Lang']]
+                label2=title
             )
+            
+            logger('Lang: {0}'.format(result_item['Lang']))
+            
+            listitem.setArt( { "icon": str(int(result_item['Rating'])), "thumb" :language_icon_mapping[result_item['Lang']] } )
             url = "plugin://{0}/?action=download&media_id={1}&type={2}" \
                 .format(script_id, result_item['Id'], result_item['Type'])
 
@@ -550,7 +552,7 @@ class ActionHandler(object):
                 show_notification(get_string(32010))
                 return
 
-            zip_file = ZipFile(StringIO.StringIO(response.content))
+            zip_file = ZipFile(io.BytesIO(response.content))
             zip_contents = zip_file.namelist()
             if not zip_contents:
                 show_notification(get_string(32010))
@@ -583,7 +585,7 @@ action_handler = ActionHandler(params_dict)
 if action_handler.validate_params():
     is_user_loggedin = action_handler.user_login()
     if is_user_loggedin:
-        logger(u'user is logged in')
+        logger('user is logged in')
         action_handler.handle_action()
 
 xbmcplugin.endOfDirectory(plugin_handle)
