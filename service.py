@@ -52,12 +52,12 @@ DONT_CONVERT_LETTERS = 0
 CONVERT_LAT_TO_CYR = 1
 CONVERT_CYR_TO_LAT = 2
 
-encoding_list = ['utf8', 'cp1250', 'windows-1250', 'cp1251', 'windows-1251', 'cp1252', 'windows-1252', 'cp1253', 'windows-1253', 'cp1254', 'windows-1254', 
+ENCODING_LIST = ['utf8', 'cp1250', 'windows-1250', 'cp1251', 'windows-1251', 'cp1252', 'windows-1252', 'cp1253', 'windows-1253', 'cp1254', 'windows-1254', 
                 'latin1', 'iso-8859-1', 'latin22', 'iso-8859-2', 'latin3', 'iso-8859-3', 'latin4', 'iso-8859-4', 'iso-8859-5', 'iso-8859-15', 'cyrillic', 
                 'cp500', 'cp850', 'cp852', 'cp855', 'mac_cyrillic', 'mac_latin2'
 ]
 
-language_mapping = {
+LANGUAGE_MAPPING = {
     'English': 'English',
     'Croatian': 'Hrvatski',
     'Serbian': 'Srpski',
@@ -66,7 +66,7 @@ language_mapping = {
     'Bosnian': 'Bosanski'
 }
 
-language_icon_mapping = {
+LANGUAGE_ICON_MAPPING = {
     'English': 'en',
     'Hrvatski': 'hr',
     'Srpski': 'sr',
@@ -76,7 +76,7 @@ language_icon_mapping = {
 }
 
 # taken from https://github.com/mikimac/script.module.lat2cyr/blob/master/lib/lat2cyr.py
-lat_to_cyr = {
+LAT_TO_CYR = {
         # Big letters
         'A': 'А', 'S': 'С', 'D': 'Д', 'F': 'Ф', 'G': 'Г',
         'H': 'Х', 'J': 'Ј', 'K': 'К', 'L': 'Л', 'Č': 'Ч',
@@ -105,8 +105,9 @@ def show_notification(message):
 
 
 def normalize_string(_string):
-    return unicodedata.normalize('NFKD', _string).encode('ascii', 'ignore')
-
+    logger('normalize_string called with %s' % _string)
+    result = unicodedata.normalize('NFKD', _string).encode('ascii', 'ignore')
+    return result.decode('utf8')
 
 def parse_season_episode(_string):
     """
@@ -115,6 +116,7 @@ def parse_season_episode(_string):
     Allowed format is 'S01E01'. Allowed number range is 00-99.
     Returns three-tuple.
     """
+    logger('parse_season_episode called with %s' % _string)
     if not _string:
         return _string, None, None
     results = re.findall('[sS](\d{2})[eE](\d{2})', _string)
@@ -150,10 +152,8 @@ def handle_lat_cyr_conversion(subtitle_file_path, convert_option):
     if os.path.isfile(converted_subtitle_file_path):
         return converted_subtitle_file_path
 
-    logger('1'.replace('Ж', 'Ž'))
-
     text = None
-    for encoding in encoding_list:
+    for encoding in ENCODING_LIST:
         try:
             with codecs.open(subtitle_file_path, 'r', encoding) as opened_file:
                 logger('reading lines with encoding: {0}'.format(encoding))
@@ -189,15 +189,15 @@ def replace_lat_cyr_letters(text, convert_option, encoding):
 
     if convert_option == CONVERT_LAT_TO_CYR:
         logger('replacing letters lat to cyr')
-        for lat_letter, cyr_letter in list(lat_to_cyr.items()):
+        for lat_letter, cyr_letter in list(LAT_TO_CYR.items()):
             _text = _text.replace(lat_letter, cyr_letter)
         #fix tag conversion, too lazy to do it with regex
-        for lat_letter, cyr_letter in list(lat_to_cyr.items()):
+        for lat_letter, cyr_letter in list(LAT_TO_CYR.items()):
             _text = _text.replace('<{0}>'.format(cyr_letter), '<{0}>'.format(lat_letter))
             _text = _text.replace('</{0}>'.format(cyr_letter), '</{0}>'.format(lat_letter))
     else:
         logger('replacing letters cyr to lat')
-        for lat_letter, cyr_letter in list(lat_to_cyr.items()):
+        for lat_letter, cyr_letter in list(LAT_TO_CYR.items()):
             _text = _text.replace(cyr_letter, lat_letter)
     return _text
 
@@ -245,13 +245,13 @@ class ActionHandler(object):
         lang_list = []
         for lang in self.params['languages'][0].split(','):
             if lang == 'Serbo-Croatian':
-                if language_mapping['Serbian'] not in lang_list:
-                    lang_list.append(language_mapping['Serbian'])
-                if language_mapping['Croatian'] not in lang_list:
-                    lang_list.append(language_mapping['Croatian'])
+                if LANGUAGE_MAPPING['Serbian'] not in lang_list:
+                    lang_list.append(LANGUAGE_MAPPING['Serbian'])
+                if LANGUAGE_MAPPING['Croatian'] not in lang_list:
+                    lang_list.append(LANGUAGE_MAPPING['Croatian'])
             else:
-                if lang in language_mapping and language_mapping[lang] not in lang_list:
-                    lang_list.append(language_mapping[lang])
+                if lang in LANGUAGE_MAPPING and LANGUAGE_MAPPING[lang] not in lang_list:
+                    lang_list.append(LANGUAGE_MAPPING[lang])
 
         lang_string = '|'.join(lang_list)
 
@@ -421,8 +421,7 @@ class ActionHandler(object):
         result_list = addon_cache.get(params_hash)
         if result_list:
             logger('results loaded from cache')
-
-        if not result_list:
+        else:
             logger('results not found in cache, getting results from API')
             search_params['token'] = self.login_token
             search_params['userid'] = self.user_id
@@ -468,8 +467,13 @@ class ActionHandler(object):
 
             if result_list:
                 addon_cache.set(params_hash, result_list, expiration=timedelta(days=3))
+            else:
+                logger('result_list empty, exiting with error')
+                show_notification(get_string(32001))
+                return
 
         for result_item in result_list:
+            logger('result_item %s' % result_item)
             title = result_item['Title']
             try:
                 season = int(result_item['Season'])
@@ -492,9 +496,7 @@ class ActionHandler(object):
                 label2=title
             )
             
-            logger('Lang: {0}'.format(result_item['Lang']))
-            
-            listitem.setArt( { "icon": str(int(result_item['Rating'])), "thumb" :language_icon_mapping[result_item['Lang']] } )
+            listitem.setArt({"icon": str(int(result_item['Rating'])), "thumb": LANGUAGE_ICON_MAPPING[result_item['Lang']]})
             url = "plugin://{0}/?action=download&media_id={1}&type={2}" \
                 .format(script_id, result_item['Id'], result_item['Type'])
 
