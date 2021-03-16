@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import os
-import sys
+from sys import argv as sys_argv
 import re
 import xbmc
 import xbmcaddon
@@ -28,18 +28,14 @@ script_name = addon.getAddonInfo('name')
 version = addon.getAddonInfo('version')
 get_string = addon.getLocalizedString
 
-script_dir = xbmc.translatePath(addon.getAddonInfo('path'))
-profile = xbmc.translatePath(addon.getAddonInfo('profile'))
-libs_dir = xbmc.translatePath(os.path.join(script_dir, 'resources', 'lib'))
-temp_dir = xbmc.translatePath(os.path.join(profile, 'temp', ''))
+profile = xbmcvfs.translatePath(addon.getAddonInfo('profile'))
+temp_dir = xbmcvfs.translatePath(os.path.join(profile, 'temp', ''))
 
 player = xbmc.Player()
 
-sys.path.append(libs_dir)
+base_plugin_url = sys_argv[0]
 
-base_plugin_url = sys.argv[0]
-
-plugin_handle = int(sys.argv[1])
+plugin_handle = int(sys_argv[1])
 
 api_url = 'https://kodi.titlovi.com/api/subtitles'
 
@@ -101,8 +97,7 @@ def logger(message):
 
 
 def show_notification(message):
-    xbmc.executebuiltin('Notification({0}, {1})'.format(script_name, message))
-
+    xbmcgui.Dialog().notification(message)
 
 def normalize_string(_string):
     logger('normalize_string called with %s' % _string)
@@ -518,7 +513,7 @@ class ActionHandler(object):
             if converted_file is not None:
                 subtitle_file_path = converted_file
             else:
-                show_notification('Latin/Cyrillic conversion error, showing original subtitle')
+                show_notification(get_string(32017))
         xbmcplugin.addDirectoryItem(handle=plugin_handle, url=subtitle_file_path, listitem=list_item, isFolder=False)
 
     def show_subtitle_picker_dialog(self, subtitle_list):
@@ -581,7 +576,7 @@ params_dict:
 {'action': ['manualsearch'], 'languages': ['English,Croatian'], 'searchstring': ['test'], 'preferredlanguage': ['English']}
 """
 
-params_dict = parse_qs(sys.argv[2])
+params_dict = parse_qs(sys_argv[2])
 logger(params_dict)
 action_handler = ActionHandler(params_dict)
 if action_handler.validate_params():

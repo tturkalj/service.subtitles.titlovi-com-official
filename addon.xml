@@ -2,7 +2,7 @@
 <addon id="service.subtitles.titlovi-com-official"
        name="Titlovi.com Official "
        version="1.2.0"
-       provider-name="titlovi.com">
+       provider-name="tturkalj">
     <requires>
         <import addon="xbmc.python" version="3.0.0"/>
         <import addon="script.module.requests" version="2.22.0"/>
@@ -16,20 +16,16 @@
         <description lang="hr_HR">Pretražite i preuzmite podnaslove sa [B]Titlovi.com[/B].[CR][CR]Kada koristite prilagođenu pretragu za [B]TV serije[/B] koristite format za sezonu i epizodu kao u ovom primjeru:[CR]The Wire [B]S01E01[/B]</description>
         <disclaimer lang="en_GB">Users need to provide [B]Titlovi.com[/B] username and password in add-on configuration</disclaimer>
         <disclaimer lang="hr_HR">Korisnici moraju upisati [B]Titlovi.com[/B] korisničko ime i lozinku u postavke dodatka</disclaimer>
-        <news lang="en_GB">New official addon [CR][CR] -Version 1.2.0[CR] Kodi Matrix (v19) update</news>
-        <news lang="hr_HR">Novi službeni addon [CR][CR] -Verzija 1.2.0[CR] Kodi Matrix (v19) nadogradnja</news>
+        <news>New official addon [CR] -Version 1.2.0[CR] Kodi Matrix (v19) update [CR][CR][CR][CR] Novi službeni addon [CR] -Verzija 1.2.0[CR] Kodi Matrix (v19) nadogradnja</news>
         <platform>all</platform>
-        <language></language>
-        <license>GNU GENERAL PUBLIC LICENSE. Version 2, June 1991</license>
-        <website>http://www.titlovi.com</website>
+        <license>GPL-2.0-only</license>
+        <website>https://www.titlovi.com</website>
         <email>info [at] titlovi {dot} com</email>
         <forum>https://forum.kodi.tv/showthread.php?tid=325289</forum>
         <assets>
             <icon>icon.png</icon>
             <fanart>fanart.jpg</fanart>
-			<screenshot>resources/media/screenshot1.jpg</screenshot>
-            <screenshot>resources/media/screenshot2.jpg</screenshot>
-            <screenshot>resources/media/screenshot3.jpg</screenshot>
+			<screenshot>resources/media/titlovi_com_screenshot.jpg</screenshot>
 		</assets>
         <source>https://github.com/tturkalj/service.subtitles.titlovi-com-official</source>
     </extension>

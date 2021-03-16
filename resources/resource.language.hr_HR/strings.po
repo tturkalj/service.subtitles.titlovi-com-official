@@ -77,3 +77,7 @@ msgstr "Pretvori ćirilicu u latinicu"
 msgctxt "#32016"
 msgid "Subtitle conversion"
 msgstr "Pretvorba podnaslova"
+
+msgctxt "#32017"
+msgid "Latin/Cyrillic conversion error, showing original subtitle"
+msgstr "Greška kod konverzije Latinica/Ćirilica, prikazuju se orginalni podnaslovi"
