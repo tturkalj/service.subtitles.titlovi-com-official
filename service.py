@@ -71,24 +71,19 @@ LANGUAGE_ICON_MAPPING = {
     'Bosanski': 'bs'
 }
 
-# taken from https://github.com/mikimac/script.module.lat2cyr/blob/master/lib/lat2cyr.py
+# although some letters seems do not require transliteration A = А, E = Е, J = Ј etc.
+# tkey just do look the same in lat/cyr but they do have different charset codes behind
 LAT_TO_CYR = {
-        # Big letters
-        'A': 'А', 'S': 'С', 'D': 'Д', 'F': 'Ф', 'G': 'Г',
-        'H': 'Х', 'J': 'Ј', 'K': 'К', 'L': 'Л', 'Č': 'Ч',
-        'Ć': 'Ћ', 'Ž': 'Ж', 'Lj': 'Љ', 'Nj': 'Њ', 'E': 'Е',
-        'R': 'Р', 'T': 'Т', 'Z': 'З', 'U': 'У', 'I': 'И',
-        'O': 'О', 'P': 'П', 'Š': 'Ш', 'Đ': 'Ђ', 'Dž': 'Џ',
-        'C': 'Ц', 'V': 'В', 'B': 'Б', 'N': 'Н', 'M': 'М',
-        'Dz': 'Ѕ',
+        # capital letters
+        'A':'А', 'B':'Б', 'C':'Ц', 'Č':'Ч', 'Ć':'Ћ', 'D':'Д','Dž':'Џ', 'Đ':'Ђ', 'E':'Е', 'F':'Ф',
+        'G':'Г', 'H':'Х', 'I':'И', 'J':'Ј', 'K':'К', 'L':'Л','Lj':'Љ', 'M':'М', 'N':'Н','Nj':'Њ', 
+        'O':'О', 'P':'П', 'R':'Р', 'S':'С', 'Š':'Ш', 'T':'Т', 'U':'У', 'V':'В', 'Z':'З', 'Ž':'Ж',
         # small letters
-        'a': 'а', 's': 'с', 'd': 'д', 'f': 'ф', 'g': 'г',
-        'h': 'х', 'j': 'ј', 'k': 'к', 'l': 'л', 'č': 'ч',
-        'ć': 'ћ', 'ž': 'ж', 'lj': 'љ', 'nj': 'њ', 'e': 'е',
-        'r': 'р', 't': 'т', 'z': 'з', 'u': 'у', 'i': 'и',
-        'o': 'о', 'p': 'п', 'š': 'ш', 'đ': 'ђ', 'dž': 'џ',
-        'c': 'ц', 'v': 'в', 'b': 'б', 'n': 'н', 'm': 'м',
-        'dz': 'ѕ'
+        'a':'а', 'b':'б', 'c':'ц', 'č':'ч', 'ć':'ћ', 'd':'д','dž':'џ', 'đ':'ђ', 'e':'е', 'f':'ф',
+        'g':'г', 'h':'х', 'i':'и', 'j':'ј', 'k':'к', 'l':'л','lj':'љ', 'm':'м', 'n':'н','nj':'њ',
+        'o':'о', 'p':'п', 'r':'р', 's':'с', 'š':'ш', 't':'т', 'u':'у', 'v':'в', 'z':'з', 'ž':'ж',
+        # title capitalization
+        'DŽ':'Џ','LJ':'Љ','NJ':'Њ'
 }
 
 
@@ -108,13 +103,13 @@ def parse_season_episode(_string):
     """
     Function used for parsing season and episode numbers from string.
     If season and episode are found they are stripped from original string.
-    Allowed format is 'S01E01'. Allowed number range is 00-99.
+    Allowed format is 'S##E##'. Allowed number ## range is 0-99.
     Returns three-tuple.
     """
     logger('parse_season_episode called with %s' % _string)
     if not _string:
         return _string, None, None
-    results = re.findall('[sS](\d{2})[eE](\d{2})', _string)
+    results = re.findall('[sS](\d{1,2})[eE](\d{1,2})', _string)
     if not results:
         return _string, None, None
     try:
